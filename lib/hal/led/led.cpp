@@ -1,10 +1,11 @@
 #include "led.hpp"
 #include <stdbool.h>
 
-using hal::led;
+using namespace hal::led;
 
-[[noreturn]] void blinkTask(const void *params) {
+[[noreturn]] void Led::blinkTask(const void *params) {
   while (true) {
-    
+    setState(hal::pin::State::In::TOGGLE);
+    vTaskDelay(pdMS_TO_TICKS(blink_delay));
   }
 }
