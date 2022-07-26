@@ -11,14 +11,20 @@
 
 
 namespace wrapper::log {
+  enum class Module {
+    MAIN,
+    PIN,
+    LED,
+    DIM,
+  };
+
   class MyLogger : public Logger {
     public:
-    enum class Module {
-      MAIN,
-      PIN,
-      LED,
-      DIM,
-    };
+    using Logger::Logger;
+
+    const char* moduleToString(Module module) const {
+      return module_to_str[static_cast<int>(module)];
+    }
 
     private:
     const char *module_to_str[static_cast<int>(Module::DIM)] = {
@@ -26,17 +32,10 @@ namespace wrapper::log {
       "hal::pin",
       "hal::led",
     };
-
-    public:
-    using Logger::Logger;
-
-    const char* moduleToString(int module) const {
-      return module_to_str[static_cast<int>(module)];
-    }
   };
 }
 
-constexpr static const wrapper::log::MyLogger::Module mod = wrapper::log::MyLogger::Module::MAIN;
+constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
 void app_main() {
   wrapper::log::MyLogger logger(ESP_LOG_DEBUG);
@@ -49,8 +48,8 @@ void app_main() {
     .intr_type = GPIO_INTR_DISABLE,
   };
   hal::led::Led builtin_led(GPIO_NUM_2, builtin_led_config);
-  // if (!builtin_led.isOk())
-  //   ESP_LOGE(TAG, "Error while building builtin_led");
+  if (!builtin_led.isOk())
+    logger.log(mod, ESP_LOG_ERROR, "Error while building builtin_led");
   /// builtin_led.setBlinkDelay(0.5_s);
   // builtin_led.startBlink(5);
 

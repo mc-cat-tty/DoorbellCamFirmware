@@ -1,12 +1,13 @@
 #include "log.hpp"
+#include <stdio.h>
 
 using namespace wrapper::log;
 
-void Logger::log(Module module, esp_log_level_t level, const char *msg, ...) const {
-  if (isModuleActive(moduleToInt(module))) {
-    va_list args;
-    va_start(args, msg);
-    logger_callbacks[level](moduleToString(module), msg, args);
-    va_end(args);
-  }
+template <typename... Types>
+void Logger::log(Module module, esp_log_level_t level, const char *format, Types&&... args) const {
+  if (!isModuleActive(moduleToInt(module)))
+    return;
+  char msg[128];
+  sprintf(msg, format, std::forward<Types>(args)...);
+  ESP_LOG_LEVEL(level, moduleToString(module), "%s", msg);
 }
