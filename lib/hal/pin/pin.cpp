@@ -22,12 +22,11 @@ using namespace hal::pin;
 
 void Pin::setState(State::In state) {
   int error_counter = 0;
-  static const int max_err_count = 5;
+  constexpr static const int max_err_count = 5;
   while (error_counter < max_err_count && !Pin::trySetState(state)) {
     error_counter++;
   }
 
-  if (error_counter >= max_err_count) {
+  if (error_counter >= max_err_count)
     throw std::runtime_error("Max retry number");
-  }
 }

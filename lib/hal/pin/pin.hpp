@@ -14,10 +14,10 @@ namespace hal::pin {
     esp_err_t err_state = ESP_OK;
 
     public:
-    Pin(gpio_num_t pin_num, const gpio_config_t* pin_config)
-      : num(pin_num), conf(*pin_config) { err_state = gpio_config(pin_config); }
+    Pin(gpio_num_t pin_num, const gpio_config_t& pin_config)
+      : conf(pin_config), num(pin_num) { err_state = gpio_config(&pin_config); }
 
-    [[noreturn]] void setState(State::In state);
+    void setState(State::In state);
 
     [[nodiscard]] constexpr bool isOk() const { return err_state == ESP_OK; }
     [[nodiscard]] State::Out getState() const { return State::fromInt(gpio_get_level(num)); }
