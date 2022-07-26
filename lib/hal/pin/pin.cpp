@@ -3,7 +3,7 @@
 
 using namespace hal::pin;
 
-[[nodiscard]] bool Pin::trySetState(State::In target_state) {
+[[nodiscard]] bool Pin::trySetState(State::In target_state) const {
   const State::Out current_state = getState();
   const bool canExit = 
     target_state != State::In::TOGGLE &&
