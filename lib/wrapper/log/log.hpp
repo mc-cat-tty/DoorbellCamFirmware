@@ -13,7 +13,7 @@ namespace wrapper::log {
   class Logger {  // singleton
     private:
     esp_log_level_t log_level = ESP_LOG_WARN;
-    uint64_t log_active_modules;  // bit vector
+    uint64_t log_active_modules = 0x00;
 
     [[nodiscard]] inline constexpr bool isModuleActive(uint64_t module_mask) const {
       return (log_active_modules & module_mask) == module_mask;

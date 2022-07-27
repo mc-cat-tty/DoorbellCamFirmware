@@ -13,7 +13,7 @@
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
 void app_main() {
-  wrapper::log::Logger logger = wrapper::log::Logger::getInstance()
+  static wrapper::log::Logger logger = wrapper::log::Logger::getInstance()
     .setThresholdLevel(ESP_LOG_DEBUG)
     .setActiveModules({
       wrapper::log::Module::MAIN,
@@ -31,18 +31,14 @@ void app_main() {
   hal::led::Led builtin_led(GPIO_NUM_2, builtin_led_config);
   if (!builtin_led.isOk())
     logger.log(mod, ESP_LOG_ERROR, "Error while building builtin_led");
-  /// builtin_led.setBlinkDelay(0.5_s);
-  // builtin_led.startBlink(5);
+  
+  static const int blink_delay = 0.05_s;
+  builtin_led.setBlinkDelay(blink_delay);
+  logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
+  builtin_led.startBlink(0);
 
   for (EVER) {
-    try {
-      builtin_led.setState(hal::pin::State::In::HIGH);
-      vTaskDelay(pdMS_TO_TICKS(500));
-      builtin_led.setState(hal::pin::State::In::LOW);
-      vTaskDelay(pdMS_TO_TICKS(500));
-    }
-    catch (const std::exception &e) {
-      logger.log(mod, ESP_LOG_ERROR, e.what());
-    }
+    logger.log(mod, ESP_LOG_DEBUG, "Main iteration");
+    vTaskDelay(pdMS_TO_TICKS(500));
   }
 }

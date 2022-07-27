@@ -23,7 +23,7 @@ namespace hal::led {
 
     inline void startBlink(unsigned priority) {
       if (!isBlinking())
-        xTaskCreate(blinkTask, blink_task_name.c_str(), 512, (void*)this, priority, &blink_handle);
+        xTaskCreate(blinkTask, blink_task_name.c_str(), 4096, (void*)this, priority, &blink_handle);
     }
     [[nodiscard]] inline constexpr bool isBlinking() const { return blink_handle != NULL; };
     inline void stopBlink() const { if (isBlinking()) vTaskDelete(blink_handle); }
