@@ -3,6 +3,7 @@
 #include <common.hpp>
 #include <time/udl.hpp>
 #include <led/led.hpp>
+#include <task/task.hpp>
 #include <stdbool.h>
 #include "driver/gpio.h"
 #include <freertos/FreeRTOS.h>
@@ -11,6 +12,13 @@
 #define EVER ;;
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
+
+void prova(int i) {
+  for (EVER) {
+    printf("prova: %d\n", i);
+    vTaskDelay(pdMS_TO_TICKS(200));
+  }
+}
 
 void app_main() {
   static wrapper::log::Logger logger = wrapper::log::Logger::getInstance()
@@ -36,6 +44,9 @@ void app_main() {
   builtin_led.setBlinkDelay(blink_delay);
   logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
   builtin_led.startBlink(0);
+
+  wrapper::task::Task<int> test(prova, 5);
+  test.start("test", 0, 4096);
 
   for (EVER) {
     logger.log(mod, ESP_LOG_DEBUG, "Main iteration");

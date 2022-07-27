@@ -5,23 +5,23 @@
 #include <tuple>
 
 namespace wrapper::task {
-  template <typename CallingClass>
+  template <class CallingClass>
   class Task {
     private:
-    std::function<CallingClass> implementation = NULL;
+    std::function<void(CallingClass)> implementation;
     TaskHandle_t handle = NULL;
-    CallingClass *owner;
+    CallingClass owner;
 
     [[noreturn]] void _task() {
       implementation(owner);
     }
 
-    [[noreturn]] void task(void *params) {
+    [[noreturn]] static void task(void *params) {
       static_cast<wrapper::task::Task<CallingClass>*>(params)->_task();
     }
 
     public:
-    Task(std::function<CallingClass> task_implementation, CallingClass method_owner)
+    Task(std::function<void(CallingClass)> task_implementation, CallingClass method_owner)
       : implementation(task_implementation), owner(method_owner) {}
 
     [[nodiscard]] inline constexpr bool isRunning() const { return handle != NULL; }
