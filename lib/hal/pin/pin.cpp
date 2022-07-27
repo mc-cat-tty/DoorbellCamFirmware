@@ -28,6 +28,7 @@ constexpr static const wrapper::log::Module mod = wrapper::log::Module::PIN;
   if (future_state != current_state)
     return true;
 
+
   return false;
 }
 

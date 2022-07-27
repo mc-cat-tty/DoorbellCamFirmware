@@ -60,6 +60,7 @@
     "complex": "cpp",
     "unordered_set": "cpp",
     "iostream": "cpp",
-    "typeindex": "cpp"
+    "typeindex": "cpp",
+    "any": "cpp"
   }
 }
