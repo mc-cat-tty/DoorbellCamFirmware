@@ -1,7 +1,12 @@
 #include "pin.hpp"
+#include <log/log.hpp>
+#include <common.hpp>
 #include <stdexcept>
 
 using namespace hal::pin;
+
+constexpr static const wrapper::log::Module mod = wrapper::log::Module::PIN;
+static const wrapper::log::Logger logger = wrapper::log::Logger::getInstance();
 
 [[nodiscard]] bool Pin::trySetState(State::In target_state) const {
   const State::Out current_state = getState();

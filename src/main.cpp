@@ -1,29 +1,14 @@
 #include "main.hpp"
 #include <log/log.hpp>
+#include <common.hpp>
 #include <time/udl.hpp>
 #include <led/led.hpp>
 #include <stdbool.h>
-#include <vector>
 #include "driver/gpio.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
 #define EVER ;;
-
-
-namespace wrapper::log {
-  enum class Module {
-    MAIN,
-    PIN,
-    LED,
-  };
-
-  std::vector<const char*> module_to_str = {
-    "main",
-    "hal::pin",
-    "hal::led",
-  };
-}
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
@@ -35,7 +20,6 @@ void app_main() {
       wrapper::log::Module::PIN,
       wrapper::log::Module::LED,
     });
-  logger.log(mod, ESP_LOG_DEBUG, "Working!");
 
   gpio_config_t builtin_led_config = {
     .pin_bit_mask = 1ULL << GPIO_NUM_2,
