@@ -19,6 +19,7 @@ void app_main() {
       wrapper::log::Module::MAIN,
       wrapper::log::Module::PIN,
       wrapper::log::Module::LED,
+      wrapper::log::Module::TASK,
     });
 
   gpio_config_t builtin_led_config = {
