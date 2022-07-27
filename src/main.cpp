@@ -3,6 +3,7 @@
 #include <time/udl.hpp>
 #include <led/led.hpp>
 #include <stdbool.h>
+#include <vector>
 #include "driver/gpio.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -15,30 +16,26 @@ namespace wrapper::log {
     MAIN,
     PIN,
     LED,
-    DIM,
   };
 
-  class MyLogger : public Logger {
-    public:
-    using Logger::Logger;
-
-    const char* moduleToString(Module module) const {
-      return module_to_str[static_cast<int>(module)];
-    }
-
-    private:
-    const char *module_to_str[static_cast<int>(Module::DIM)] = {
-      "main",
-      "hal::pin",
-      "hal::led",
-    };
+  std::vector<const char*> module_to_str = {
+    "main",
+    "hal::pin",
+    "hal::led",
   };
 }
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
 void app_main() {
-  wrapper::log::MyLogger logger(ESP_LOG_DEBUG);
+  wrapper::log::Logger logger = wrapper::log::Logger::getInstance()
+    .setThresholdLevel(ESP_LOG_DEBUG)
+    .setActiveModules({
+      wrapper::log::Module::MAIN,
+      wrapper::log::Module::PIN,
+      wrapper::log::Module::LED,
+    });
+  logger.log(mod, ESP_LOG_DEBUG, "Working!");
 
   gpio_config_t builtin_led_config = {
     .pin_bit_mask = 1ULL << GPIO_NUM_2,
@@ -61,7 +58,7 @@ void app_main() {
       vTaskDelay(pdMS_TO_TICKS(500));
     }
     catch (const std::exception &e) {
-      // ESP_LOGE(TAG, "%s", e.what());
+      logger.log(mod, ESP_LOG_ERROR, e.what());
     }
   }
 }
