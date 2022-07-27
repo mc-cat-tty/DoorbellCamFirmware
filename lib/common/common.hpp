@@ -5,5 +5,6 @@ namespace wrapper::log {
     MAIN,
     PIN,
     LED,
+    TASK,
   };
 }

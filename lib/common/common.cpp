@@ -6,5 +6,6 @@ namespace wrapper::log {
     "main",
     "hal::pin",
     "hal::led",
+    "wrapper::task",
   };
 }
