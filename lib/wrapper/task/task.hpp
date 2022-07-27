@@ -6,14 +6,12 @@
 #include <functional>
 #include <tuple>
 
-constexpr static const wrapper::log::Module mod = wrapper::log::Module::TASK;
-
 
 namespace wrapper::task {
   template <class CallingClass>
   class Task {
     private:
-    std::function<void(CallingClass)> implementation;
+    std::function<void(CallingClass*)> implementation;
     TaskHandle_t handle = NULL;
     CallingClass *owner;
 
@@ -26,13 +24,14 @@ namespace wrapper::task {
     }
 
     public:
-    Task(std::function<void(CallingClass)> task_implementation, CallingClass *method_owner)
+    Task(std::function<void(CallingClass*)> task_implementation, CallingClass *method_owner)
       : implementation(task_implementation), owner(method_owner) {}
 
     [[nodiscard]] inline constexpr bool isRunning() const { return handle != NULL; }
 
     inline void start(const char *name, unsigned priority, unsigned stack_size) {
       if (!isRunning()) {
+        constexpr static const wrapper::log::Module mod = wrapper::log::Module::TASK;
         static const wrapper::log::Logger logger = wrapper::log::Logger::getInstance();
         xTaskCreate(task, name, stack_size, (void*)this, priority, &handle);
         logger.log(mod, ESP_LOG_INFO, "Started task %s with owner %p", name, owner);

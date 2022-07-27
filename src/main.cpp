@@ -36,7 +36,7 @@ void app_main() {
   static const int blink_delay = 0.05_s;
   builtin_led.setBlinkDelay(blink_delay);
   logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
-  builtin_led.startBlink(0);
+  builtin_led.getBlinkTask().start("BuiltinLedTask", 0, 4096);
 
   for (EVER) {
     logger.log(mod, ESP_LOG_DEBUG, "Main iteration");

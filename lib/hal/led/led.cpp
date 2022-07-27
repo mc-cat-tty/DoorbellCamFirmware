@@ -9,7 +9,7 @@ using namespace hal::led;
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::LED;
 
-[[noreturn]] void Led::__blinkTask() {
+[[noreturn]] void Led::blinkTask() {
   static const wrapper::log::Logger logger = wrapper::log::Logger::getInstance();
 
   for (EVER) {
@@ -22,8 +22,4 @@ constexpr static const wrapper::log::Module mod = wrapper::log::Module::LED;
       logger.log(mod, ESP_LOG_ERROR, e.what());
     }
   }
-}
-
-[[noreturn]] void Led::blinkTask(void *params) {
-  static_cast<hal::led::Led*>(params)->__blinkTask();
 }

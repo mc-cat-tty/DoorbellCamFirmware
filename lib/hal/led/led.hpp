@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
+#include <functional>
 #include <time/udl.hpp>
 #include <pin/pin.hpp>
+#include <task/task.hpp>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -9,26 +11,19 @@ namespace hal::led {
   class Led : public hal::pin::Pin {
     private:
     int blink_delay = 0_s;
-    TaskHandle_t blink_handle = NULL;
-    std::string blink_task_name = std::string("blinkLedPin") + std::to_string(num);
+    wrapper::task::Task<hal::led::Led> blink_task;
 
-    [[noreturn]] void __blinkTask();
-    [[noreturn]] static void blinkTask(void *params);
+    [[noreturn]] void blinkTask();
 
     public:
-    using hal::pin::Pin::Pin;
+    Led(gpio_num_t pin_num, const gpio_config_t& pin_config)
+      : Pin(pin_num, pin_config),
+      blink_task(&hal::led::Led::blinkTask, this) {}
 
-    [[nodiscard]] constexpr int getBlinkDelay() const { return blink_delay; }
-    void setBlinkDelay(int delay) { blink_delay = delay; }
+    [[nodiscard]] inline constexpr int getBlinkDelay() const { return blink_delay; }
+    inline void setBlinkDelay(int delay) { blink_delay = delay; }
 
-    inline void startBlink(unsigned priority) {
-      if (!isBlinking())
-        xTaskCreate(blinkTask, blink_task_name.c_str(), 4096, (void*)this, priority, &blink_handle);
-    }
-    [[nodiscard]] inline constexpr bool isBlinking() const { return blink_handle != NULL; };
-    inline void stopBlink() const {
-      if (isBlinking())
-        vTaskDelete(blink_handle);
-    }
+    [[nodiscard]] inline constexpr wrapper::task::Task<hal::led::Led> getBlinkTask()
+      const { return blink_task; }
   };
 }
