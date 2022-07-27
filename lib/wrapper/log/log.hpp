@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <utility>
 #include "esp_log.h"
 
@@ -13,7 +14,7 @@ namespace wrapper::log {
     uint64_t log_active_modules;  // bit vector
 
 
-    [[nodiscard]] constexpr bool isModuleActive(uint64_t module_mask) const {
+    [[nodiscard]] inline constexpr bool isModuleActive(uint64_t module_mask) const {
       return (log_active_modules & module_mask) == module_mask;
     }
 
@@ -24,11 +25,17 @@ namespace wrapper::log {
     
     virtual const char* moduleToString(Module module) const = 0;
 
-    [[nodiscard]] constexpr uint64_t moduleToInt(Module module) const {
+    [[nodiscard]] inline constexpr uint64_t moduleToInt(Module module) const {
       return 1ULL << static_cast<int>(module);
     }
 
     template <typename... Types>
-    void log(Module module, esp_log_level_t level, const char *format, Types&&... args) const;    
+    void log(Module module, esp_log_level_t level, const char *format, Types&&... args) const {
+      if (!isModuleActive(moduleToInt(module)))
+        return;
+      char msg[128];
+      sprintf(msg, format, std::forward<Types>(args)...);
+      ESP_LOG_LEVEL(level, moduleToString(module), "%s", msg);
+    }   
   };
 }

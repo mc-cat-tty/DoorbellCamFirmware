@@ -15,9 +15,9 @@ namespace hal::pin {
       TOGGLE,
     };
 
-    [[nodiscard]] static constexpr Out fromInt(int level) { return static_cast<Out>(level); }
-    [[nodiscard]] static constexpr int toInt(Out state) { return static_cast<int>(state); }
-    static Out fromIn(In inState) {
+    [[nodiscard]] inline static constexpr Out fromInt(int level) { return static_cast<Out>(level); }
+    [[nodiscard]] inline static constexpr int toInt(Out state) { return static_cast<int>(state); }
+    inline static Out fromIn(In inState) {
       if (inState == In::TOGGLE)
         throw std::invalid_argument("Invalid input state");
       return static_cast<Out>(inState);
