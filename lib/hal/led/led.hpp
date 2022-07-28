@@ -16,7 +16,7 @@ namespace hal::led {
     [[noreturn]] void blinkTask();
 
     public:
-    constexpr Led(gpio_num_t pin_num, const gpio_config_t& pin_config)
+    Led(gpio_num_t pin_num, const gpio_config_t& pin_config)
       : Pin(pin_num, pin_config),
       blink_task(&hal::led::Led::blinkTask, this) {}
 

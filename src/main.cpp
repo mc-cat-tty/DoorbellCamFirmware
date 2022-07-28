@@ -3,6 +3,7 @@
 #include <common.hpp>
 #include <time/udl.hpp>
 #include <led/led.hpp>
+#include <rf/rf.hpp>
 #include <stdbool.h>
 #include <driver/gpio.h>
 #include <freertos/FreeRTOS.h>
@@ -30,16 +31,20 @@ void app_main() {
     .pull_down_en = GPIO_PULLDOWN_DISABLE,
     .intr_type = GPIO_INTR_DISABLE,
   };
-  hal::led::Led builtin_led(GPIO_NUM_2, builtin_led_config);
-  if (!builtin_led.isOk())
-    logger.log(mod, ESP_LOG_ERROR, "Error while building builtin_led");
+  // hal::led::Led builtin_led(GPIO_NUM_2, builtin_led_config);
+  // if (!builtin_led.isOk())
+  //   logger.log(mod, ESP_LOG_ERROR, "Error while building builtin_led");
   
-  static const int blink_delay = 0.05_s;
-  builtin_led.setBlinkDelay(blink_delay);
-  logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
-  builtin_led.getBlinkTask().start("BuiltinLedTask", 0, 4096);
+  // static const int blink_delay = 0.05_s;
+  // builtin_led.setBlinkDelay(blink_delay);
+  // logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
+  // builtin_led.getBlinkTask().start("BuiltinLedTask", 0, 4096);
+
+  // hal::rf::TxPwm tx(GPIO_NUM_18);
+  hal::rf::TxPwm tx(GPIO_NUM_2);
 
   for (EVER) {
+    tx.setDuty(0xffUL);
     logger.log(mod, ESP_LOG_DEBUG, "Main iteration");
     vTaskDelay(pdMS_TO_TICKS(500));
   }
