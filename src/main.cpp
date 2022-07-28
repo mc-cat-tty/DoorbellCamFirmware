@@ -44,8 +44,12 @@ void app_main() {
   hal::rf::TxPwm tx(GPIO_NUM_2);
 
   for (EVER) {
-    tx.setDuty(0xffUL);
     logger.log(mod, ESP_LOG_DEBUG, "Main iteration");
-    vTaskDelay(pdMS_TO_TICKS(500));
+    tx.setDutyPercentage(0.1);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    tx.setDutyPercentage(0.5);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    tx.setDutyPercentage(1.0);
+    vTaskDelay(pdMS_TO_TICKS(2000));
   }
 }
