@@ -7,13 +7,13 @@ namespace hal::rf {
    * @brief encoding state in duty cycle. See LEDC module.
    * 
    */
-  class Tx {
+  class TxPwm {
     private:
     ledc_timer_config_t timer_conf;
     ledc_channel_config_t channel_conf;
 
     public:
-    Tx(gpio_num_t pin_num) {
+    TxPwm(gpio_num_t pin_num) {
       timer_conf = {
         .speed_mode = LEDC_HIGH_SPEED_MODE,
         .duty_resolution = LEDC_TIMER_10_BIT,
