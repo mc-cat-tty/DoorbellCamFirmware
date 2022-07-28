@@ -1,6 +1,6 @@
 #pragma once
 #include "pin_state.hpp"
-#include "driver/gpio.h"
+#include <driver/gpio.h>
 
 namespace hal::pin {
   class Pin {
