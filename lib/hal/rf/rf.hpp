@@ -4,6 +4,7 @@
 #include <task/task.hpp>
 #include <time/udl.hpp>
 #include <freertos/queue.h>
+#include <iostream>
 
 namespace hal::rf {
   /**
@@ -28,8 +29,10 @@ namespace hal::rf {
 
     void setDutyPercentage(float duty_cycle_percentage); /** 0<=duty_cycle_percentage<=1 */
     
-    inline void sendDutyAsync(float duty)
-      { if (duty_queue != NULL) xQueueSend(duty_queue, (void*) &duty, 0); }
+    inline void sendDutyAsync(float duty) {
+      if (duty_queue != NULL)
+        xQueueSend(duty_queue, (void*) &duty, 0);
+    }
 
     [[nodiscard]] inline constexpr wrapper::task::Task<hal::rf::TxPwm> getTxTask()
       const { return tx_task; }

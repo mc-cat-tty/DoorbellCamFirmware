@@ -13,7 +13,7 @@ constexpr static const wrapper::log::Module mod = wrapper::log::Module::RF;
 
 TxPwm::TxPwm(gpio_num_t pin_num) : tx_task(&hal::rf::TxPwm::txTask, this) {
   duty_queue = xQueueCreate(queue_dim, sizeof(float));
-  
+
   duty_resolution = LEDC_TIMER_10_BIT;
 
   ledc_timer_config_t timer_conf_local = {
@@ -60,11 +60,12 @@ void TxPwm::setDutyPercentage(float duty_cycle_percentage) {
   static float rcv_duty;
 
   for (EVER) {
-    static bool duty_received =
+    bool duty_received =
       duty_queue != NULL &&
       xQueueReceive(duty_queue, &rcv_duty, 5);
     
     if (duty_received) {
+      logger.log(mod, ESP_LOG_DEBUG, "Sending duty=%f", rcv_duty);
       ledc_timer_resume(channel_conf.speed_mode, channel_conf.timer_sel);
       setDutyPercentage(rcv_duty);
       vTaskDelay(pdMS_TO_TICKS(tx_time));

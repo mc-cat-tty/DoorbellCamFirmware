@@ -44,7 +44,7 @@ void app_main() {
   tx.getTxTask().start("TxTask", 0, 8192);
 
   static const int max_duty = 10;
-  static const int duty_increment = 1;
+  static const int duty_increment = 2;
   static int current_duty = 0;
   for (EVER) {
     tx.sendDutyAsync((float)current_duty/10);
