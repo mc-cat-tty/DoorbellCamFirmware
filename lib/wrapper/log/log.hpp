@@ -31,7 +31,7 @@ namespace wrapper::log {
       return *this;
     }
 
-    inline Logger& setActiveModules(std::vector<Module> modules) {
+    inline Logger& setActiveModules(std::initializer_list<Module> modules) {
       for (const Module &mod : modules) {
         log_active_modules |= moduleToInt(mod);
       }
