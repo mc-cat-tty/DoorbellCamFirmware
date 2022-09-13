@@ -5,12 +5,10 @@
 #include <vector>
 #include <utility>
 #include "esp_log.h"
+#include "common.hpp"
 
 namespace wrapper::log {
-  enum class Module;
-  extern std::vector<const char*> module_to_str;
-  
-  class Logger {  // singleton
+  class Logger {
     private:
     esp_log_level_t log_level = ESP_LOG_WARN;
     uint64_t log_active_modules = 0x00;
@@ -52,6 +50,7 @@ namespace wrapper::log {
     void log(Module module, esp_log_level_t level, const char *format, Types&&... args) const {
       if (!isModuleActive(moduleToInt(module)))
         return;
+
       char msg[128];
       sprintf(msg, format, std::forward<Types>(args)...);
       ESP_LOG_LEVEL(level, moduleToString(module), "%s", msg);
