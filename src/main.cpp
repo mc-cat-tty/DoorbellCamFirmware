@@ -52,6 +52,6 @@ void app_main() {
     current_duty %= max_duty;
 
     logger.log(mod, ESP_LOG_DEBUG, "Main iteration");
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
