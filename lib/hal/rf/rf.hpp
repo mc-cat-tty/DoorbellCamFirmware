@@ -4,7 +4,6 @@
 #include <task/task.hpp>
 #include <time/udl.hpp>
 #include <freertos/queue.h>
-#include <iostream>
 
 namespace hal::rf {
   /**
