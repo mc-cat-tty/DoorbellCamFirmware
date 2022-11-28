@@ -15,7 +15,15 @@ namespace hal::pin {
 
     public:
     Pin(gpio_num_t pin_num, const gpio_config_t& pin_config)
-      : conf(pin_config), num(pin_num) { err_state = gpio_config(&pin_config); }
+      : conf(pin_config),
+      num(pin_num)
+      {
+        err_state = gpio_config(&pin_config);
+      }
+    
+    Pin(gpio_num_t pin_num)
+      : num(pin_num)
+      {}
 
     void setState(State::In state);
 

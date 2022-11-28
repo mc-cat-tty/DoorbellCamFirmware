@@ -7,5 +7,6 @@ namespace wrapper::log {
     LED,
     RF,
     TASK,
+    ANIMATION,
   };
 }

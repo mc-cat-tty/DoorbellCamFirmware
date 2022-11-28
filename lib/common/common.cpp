@@ -8,5 +8,6 @@ namespace wrapper::log {
     "hal::led",
     "hal::rf",
     "wrapper::task",
+    "app::animation",
   };
 }

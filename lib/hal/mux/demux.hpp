@@ -5,6 +5,7 @@
 #include <cmath>
 #include <initializer_list>
 #include <vector>
+#include <driver/gpio.h>
 
 using namespace hal::pin;
 
@@ -15,8 +16,13 @@ namespace hal::mux {
     std::vector<Pin> selectorPins;
 
     public:
-    Demux (Pin input, std::initializer_list<Pin> selectors)
+    Demux(Pin input, std::initializer_list<Pin> selectors)
       : inputPin{input},
+      selectorPins{selectors}
+      {}
+    
+    Demux(std::initializer_list<Pin> selectors)
+      : inputPin(GPIO_NUM_MAX),
       selectorPins{selectors}
       {}
     
