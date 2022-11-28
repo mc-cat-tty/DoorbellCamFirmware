@@ -43,8 +43,8 @@ namespace app::animation {
     }
     
     public:
-    Animator(IAnimation *animationService, time_t refreshDelay, time_t stopTimeout = 500_ms)
-      : animationService{animationService},
+    Animator(IAnimation &animationService, time_t refreshDelay, time_t stopTimeout = 500_ms)
+      : animationService{&animationService},
       refreshDelay{refreshDelay},
       stopTimeout{stopTimeout},
       animationTask(&app::animation::Animator::loop, this)

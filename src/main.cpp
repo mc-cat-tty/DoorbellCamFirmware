@@ -83,5 +83,5 @@ void app_main() {
   };
 
   auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-  auto animator = Animator((IAnimation*) &spinnerFw, 50_ms);
+  auto animator = Animator(spinnerFw, 50_ms);
 }
