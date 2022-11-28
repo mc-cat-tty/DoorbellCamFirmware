@@ -15,31 +15,31 @@ namespace app::animation {
 
   class SpinnerAnimation : public IAnimation {
     protected:
-      Demux demux;
+    Demux demux;
     
     public:
-      SpinnerAnimation(Demux demux)
-        : demux{demux}
-        {}
+    SpinnerAnimation(Demux demux)
+      : demux{demux}
+      {}
   };
 
   class SpinnerForwardAnimation : public SpinnerAnimation {
     private:
-      size_t currentSelection = 0;
+    size_t currentSelection = 0;
     
     public:
-      using SpinnerAnimation::SpinnerAnimation;
-      
-      inline void animate() {
-        const size_t selectionCount = demux.getSelCount();
+    using SpinnerAnimation::SpinnerAnimation;
+    
+    inline void animate() {
+      const size_t selectionCount = demux.getSelCount();
 
-        if (currentSelection < selectionCount) {
-          demux.select(currentSelection++);
-          return;
-        }
-
-        running = false;
+      if (currentSelection < selectionCount) {
+        demux.select(currentSelection++);
+        return;
       }
+
+      running = false;
+    }
   };
 
   class SpinnerReverseAnimation : public SpinnerAnimation {
@@ -47,18 +47,18 @@ namespace app::animation {
     int64_t currentSelection;
     
     public:
-      SpinnerReverseAnimation(Demux demux)
-        : SpinnerAnimation(demux),
-        currentSelection{demux.getSelCount() - 1}
-        {}
-      
-      inline void animate() {
-        if (currentSelection >= 0) {
-          demux.select(currentSelection--);
-          return;
-        }
-
-        running = false;
+    SpinnerReverseAnimation(Demux demux)
+      : SpinnerAnimation(demux),
+      currentSelection{demux.getSelCount() - 1}
+      {}
+    
+    inline void animate() {
+      if (currentSelection >= 0) {
+        demux.select(currentSelection--);
+        return;
       }
+
+      running = false;
+    }
   };
 }

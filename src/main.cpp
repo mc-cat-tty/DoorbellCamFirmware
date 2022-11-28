@@ -76,11 +76,11 @@ void app_main() {
   };
 
   auto ledRingDemux = Demux{
-      Pin(GPIO_NUM_25, led_config),
-      Pin(GPIO_NUM_26, led_config),
-      Pin(GPIO_NUM_32, led_config),
-      Pin(GPIO_NUM_33, led_config),
-    };
+    Led(GPIO_NUM_25, led_config),
+    Led(GPIO_NUM_26, led_config),
+    Led(GPIO_NUM_32, led_config),
+    Led(GPIO_NUM_33, led_config),
+  };
 
   auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
   auto animator = Animator((IAnimation*) &spinnerFw, 50_ms);
