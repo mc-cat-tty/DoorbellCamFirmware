@@ -13,14 +13,14 @@ constexpr static const wrapper::log::Module mod = wrapper::log::Module::PIN;
   const State::Out current_state = getState();
   const bool canExit = 
     target_state != State::In::TOGGLE &&
-    current_state == State::fromIn(target_state);
+    current_state == State::fromInToOut(target_state);
   
   logger.log(mod, ESP_LOG_DEBUG, "target_state: %d", (int)target_state);
 
   if (canExit)
     return true;
   
-  gpio_set_level(num, !State::toInt(current_state));
+  gpio_set_level(num, !State::fromOutToInt(current_state));
   const State::Out future_state = getState();
   logger.log(mod, ESP_LOG_DEBUG,
     "current_state:%d\tfuture_state:%d",

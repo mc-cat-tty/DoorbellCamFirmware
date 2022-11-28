@@ -18,7 +18,8 @@ namespace hal::led {
     public:
     Led(gpio_num_t pin_num, const gpio_config_t& pin_config)
       : Pin(pin_num, pin_config),
-      blink_task(&hal::led::Led::blinkTask, this) {}
+      blink_task(&hal::led::Led::blinkTask, this)
+      {}
 
     [[nodiscard]] inline constexpr int getBlinkDelay() const { return blink_delay; }
     inline void setBlinkDelay(int delay) { blink_delay = delay; }
