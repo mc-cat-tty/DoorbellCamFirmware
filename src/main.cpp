@@ -29,6 +29,7 @@ void app_main() {
       wrapper::log::Module::LED,
       wrapper::log::Module::RF,
       wrapper::log::Module::TASK,
+      wrapper::log::Module::ANIMATION,
     });
 /*
   gpio_config_t builtin_led_config = {
@@ -69,7 +70,7 @@ void app_main() {
       1ULL << 26 |
       1ULL << 32 |
       1ULL << 33,
-    .mode = GPIO_MODE_OUTPUT,
+    .mode = GPIO_MODE_INPUT_OUTPUT,
     .pull_up_en = GPIO_PULLUP_DISABLE,
     .pull_down_en = GPIO_PULLDOWN_DISABLE,
     .intr_type = GPIO_INTR_DISABLE,
@@ -82,6 +83,7 @@ void app_main() {
     Led(GPIO_NUM_33, led_config),
   };
 
-  auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-  auto animator = Animator(spinnerFw, 50_ms);
+  IAnimation&& spinnerLog = SpinnerLogMock(ledRingDemux);
+  auto animator = Animator(spinnerLog, 50_ms);
+  logger.log(mod, ESP_LOG_DEBUG, "First animation run");
 }
