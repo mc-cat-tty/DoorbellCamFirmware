@@ -2,7 +2,6 @@
 #include "pin/pin.hpp"
 #include "pin/pin_state.hpp"
 #include <cstdint>
-#include <cmath>
 #include <initializer_list>
 #include <vector>
 #include <driver/gpio.h>
