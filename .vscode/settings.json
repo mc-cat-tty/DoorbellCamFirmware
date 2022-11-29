@@ -61,8 +61,10 @@
     "unordered_set": "cpp",
     "iostream": "cpp",
     "typeindex": "cpp",
-    "any": "cpp"
+    "any": "cpp",
+    "*.ipp": "cpp"
   },
   "idf.adapterTargetName": "esp32",
-  "idf.port": "/dev/ttyUSB0"
+  "idf.port": "/dev/ttyUSB0",
+  "cmake.configureOnOpen": false
 }

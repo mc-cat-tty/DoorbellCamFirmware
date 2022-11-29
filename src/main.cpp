@@ -70,27 +70,27 @@ void app_main() {
       1ULL << 26 |
       1ULL << 32 |
       1ULL << 33,
-    .mode = GPIO_MODE_INPUT_OUTPUT,
+    .mode = GPIO_MODE_OUTPUT,
     .pull_up_en = GPIO_PULLUP_DISABLE,
     .pull_down_en = GPIO_PULLDOWN_DISABLE,
     .intr_type = GPIO_INTR_DISABLE,
   };
 
   auto ledRingDemux = Demux{
-    Led(GPIO_NUM_25, led_config),
-    Led(GPIO_NUM_26, led_config),
-    Led(GPIO_NUM_32, led_config),
     Led(GPIO_NUM_33, led_config),
+    Led(GPIO_NUM_25, led_config),
+    Led(GPIO_NUM_32, led_config),
+    Led(GPIO_NUM_26, led_config),
   };
 
-  auto spinnerLog = SpinnerLogMock(ledRingDemux);
-  auto animator = Animator(spinnerLog, 50_ms);
+  auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
+  auto animator = Animator(spinnerFw, 200_ms);
   logger.log(mod, ESP_LOG_DEBUG, "First animation run");
 
   for (EVER) {
     if (!animator.isRunning()) {
-      spinnerLog = SpinnerLogMock(ledRingDemux);
-      animator = Animator(spinnerLog, 50_ms);
+      spinnerFw = SpinnerForwardAnimation(ledRingDemux);
+      animator = Animator(spinnerFw, 200_ms);
     }
     vTaskDelay(pdMS_TO_TICKS(10_ms));
   }

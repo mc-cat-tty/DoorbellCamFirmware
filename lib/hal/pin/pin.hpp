@@ -26,6 +26,7 @@ namespace hal::pin {
       {}
 
     void setState(State::In state);
+    bool uncheckedSetState(State::In state);
 
     [[nodiscard]] inline constexpr bool isOk() const { return err_state == ESP_OK; }
     [[nodiscard]] inline State::Out getState() const { return State::fromIntToOut(gpio_get_level(num)); }

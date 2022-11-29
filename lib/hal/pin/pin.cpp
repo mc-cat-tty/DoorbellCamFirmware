@@ -52,3 +52,11 @@ void Pin::setState(State::In state) {
   if (error_counter >= max_err_count)
     throw std::runtime_error("Max retry number");
 }
+
+bool Pin::uncheckedSetState(State::In state) {
+  if (gpio_set_level(num, State::fromInToInt(state)) != ESP_OK) {
+    return false;
+  }
+
+  return true;
+}

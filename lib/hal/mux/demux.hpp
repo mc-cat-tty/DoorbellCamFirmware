@@ -33,7 +33,7 @@ namespace hal::mux {
 
       for (int i = 0; i < selectorPins.size(); i++) {
         
-        selectorPins[i].setState(
+        selectorPins[i].uncheckedSetState(
           State::fromIntToIn(
             (selectionBits >> i) & 0x01
           )
