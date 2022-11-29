@@ -83,7 +83,15 @@ void app_main() {
     Led(GPIO_NUM_33, led_config),
   };
 
-  IAnimation&& spinnerLog = SpinnerLogMock(ledRingDemux);
+  auto spinnerLog = SpinnerLogMock(ledRingDemux);
   auto animator = Animator(spinnerLog, 50_ms);
   logger.log(mod, ESP_LOG_DEBUG, "First animation run");
+
+  for (EVER) {
+    if (!animator.isRunning()) {
+      spinnerLog = SpinnerLogMock(ledRingDemux);
+      animator = Animator(spinnerLog, 50_ms);
+    }
+    vTaskDelay(pdMS_TO_TICKS(10_ms));
+  }
 }

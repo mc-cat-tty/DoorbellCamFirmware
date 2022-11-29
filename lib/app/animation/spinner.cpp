@@ -13,8 +13,9 @@ void SpinnerLogMock::animate() {
   logger.log(mod, ESP_LOG_DEBUG, "selCount: %d", selectionCount);
   
   if (currentSelection < selectionCount) {
-    demux.select(currentSelection++);
+    demux.select(currentSelection);
     logger.log(mod, ESP_LOG_DEBUG, "Selecting bit number: %d", currentSelection);
+    currentSelection++;
     return;
   }
 
