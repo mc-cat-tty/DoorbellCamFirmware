@@ -1,6 +1,7 @@
 #pragma once
 #include "animation.hpp"
 #include <mux/demux.hpp>
+#include <cmath>
 
 using namespace hal::mux;
 
@@ -31,7 +32,7 @@ namespace app::animation {
     using SpinnerAnimation::SpinnerAnimation;
     
     inline void animate() {
-      const size_t selectionCount = demux.getSelCount();
+      const size_t selectionCount = pow(2ULL, demux.getSelCount());
 
       if (currentSelection < selectionCount) {
         demux.select(currentSelection++);
@@ -49,7 +50,7 @@ namespace app::animation {
     public:
     SpinnerReverseAnimation(Demux demux)
       : SpinnerAnimation(demux),
-      currentSelection{demux.getSelCount() - 1}
+      currentSelection{ (int64_t) pow(2ULL, demux.getSelCount()) - 1 }
       {}
     
     inline void animate() {
@@ -61,4 +62,14 @@ namespace app::animation {
       running = false;
     }
   };
+
+  class SpinnerLogMock : public SpinnerAnimation {
+    private:
+    size_t currentSelection = 0;
+
+    public:
+    using SpinnerAnimation::SpinnerAnimation;
+    void animate();
+  };
+
 }
