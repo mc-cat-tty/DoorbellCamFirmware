@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <vector>
+#include <initializer_list>
 #include <utility>
 #include "esp_log.h"
 
@@ -33,7 +34,7 @@ namespace wrapper::log {
       return *this;
     }
 
-    inline Logger& setActiveModules(std::vector<Module> modules) {
+    inline Logger& setActiveModules(std::initializer_list<Module> modules) {
       for (const Module &mod : modules) {
         log_active_modules |= moduleToInt(mod);
       }
