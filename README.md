@@ -28,7 +28,7 @@ pio run --environment release
 Move into *DoorbellCamFirmware/.pio/build/[esp32doit-devkit-v1|release]*
 
 ```bash
-esptool.py -p /dev/ttyUSB0 -b 115200 write_flash -z 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
+esptool.py -p /dev/ttyUSB0 -b 115200 write_flash -fm dio -z 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
 ```
 
 ## How to debug
