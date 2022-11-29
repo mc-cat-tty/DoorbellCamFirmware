@@ -53,6 +53,10 @@ namespace app::animation {
       }
     
     ~Animator() {
+      if (!animationService->isRunning()) {
+        return;
+      }
+
       const time_t toWait = 10_ms;
       time_t passed = 0;
 
@@ -62,6 +66,10 @@ namespace app::animation {
       }
 
       animationTask.stop();
+    }
+
+    [[nodiscard]] inline bool isRunning() {
+      return animationService->isRunning();
     }
   
   };
