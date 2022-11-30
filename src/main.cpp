@@ -8,6 +8,7 @@
 #include <animation/spinner.hpp>
 #include <stdbool.h>
 #include <driver/gpio.h>
+#include <driver/mcpwm.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -16,7 +17,7 @@
 using namespace hal::pin;
 using namespace hal::led;
 using namespace hal::mux;
-using namespace app::animation;
+using namespace wrapper::animation;
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
@@ -31,38 +32,40 @@ void app_main() {
       wrapper::log::Module::TASK,
       wrapper::log::Module::ANIMATION,
     });
-/*
-  gpio_config_t builtin_led_config = {
-    .pin_bit_mask = 1ULL << GPIO_NUM_2,
-    .mode = GPIO_MODE_INPUT_OUTPUT,
-    .pull_up_en = GPIO_PULLUP_DISABLE,
-    .pull_down_en = GPIO_PULLDOWN_DISABLE,
-    .intr_type = GPIO_INTR_DISABLE,
-  };
-  hal::led::Led builtin_led(GPIO_NUM_2, builtin_led_config);
-  if (!builtin_led.isOk())
-    logger.log(mod, ESP_LOG_ERROR, "Error while building builtin_led");
+
+
+  // gpio_config_t builtin_led_config = {
+  //   .pin_bit_mask = 1ULL << GPIO_NUM_2,
+  //   .mode = GPIO_MODE_INPUT_OUTPUT,
+  //   .pull_up_en = GPIO_PULLUP_DISABLE,
+  //   .pull_down_en = GPIO_PULLDOWN_DISABLE,
+  //   .intr_type = GPIO_INTR_DISABLE,
+  // };
+  // hal::led::Led builtin_led(GPIO_NUM_2, builtin_led_config);
+  // if (!builtin_led.isOk())
+  //   logger.log(mod, ESP_LOG_ERROR, "Error while building builtin_led");
   
-  static const int blink_delay = 0.5_s;
-  builtin_led.setBlinkDelay(blink_delay);
-  logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
-  builtin_led.getBlinkTask().start("BuiltinLedTask", 0, 4096);
+  // static const int blink_delay = 0.5_s;
+  // builtin_led.setBlinkDelay(blink_delay);
+  // logger.log(mod, ESP_LOG_INFO, "blink_delay = %d ms", blink_delay);
+  // builtin_led.getBlinkTask().start("BuiltinLedTask", 0, 4096);
 
-  hal::rf::TxPwm tx(GPIO_NUM_18);
-  tx.getTxTask().start("TxTask", 0, 8192);
+  // hal::rf::TxPwm tx(GPIO_NUM_18);
+  // tx.getTxTask().start("TxTask", 0, 8192);
 
-  static const int max_duty = 10;
-  static const int duty_increment = 2;
-  static int current_duty = 0;
-  for (EVER) {
-    tx.sendDutyAsync((float)current_duty/10);
-    current_duty += duty_increment;
-    current_duty %= max_duty;
+  // static const int max_duty = 10;
+  // static const int duty_increment = 2;
+  // static int current_duty = 0;
+  // for (EVER) {
+  //   tx.sendDutyAsync((float)current_duty/10);
+  //   current_duty += duty_increment;
+  //   current_duty %= max_duty;
 
-    logger.log(mod, ESP_LOG_DEBUG, "Main iteration");
-    vTaskDelay(pdMS_TO_TICKS(1000));
-  }
-  */
+  //   logger.log(mod, ESP_LOG_DEBUG, "Main iteration");
+  //   vTaskDelay(pdMS_TO_TICKS(1000));
+  // }
+
+
 
   auto led_config = (gpio_config_t) {
     .pin_bit_mask =

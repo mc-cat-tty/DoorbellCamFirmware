@@ -6,7 +6,7 @@
 
 using namespace wrapper::task;
 
-namespace app::animation {
+namespace wrapper::animation {
   class IAnimation {
     protected:
     bool running = true;
@@ -31,7 +31,7 @@ namespace app::animation {
     IAnimation *animationService;
     time_t refreshDelay;
     time_t stopTimeout;
-    Task<app::animation::Animator> animationTask;
+    Task<wrapper::animation::Animator> animationTask;
 
     inline void loop() {
       while (animationService->isRunning()) {
@@ -47,7 +47,7 @@ namespace app::animation {
       : animationService{&animationService},
       refreshDelay{refreshDelay},
       stopTimeout{stopTimeout},
-      animationTask(&app::animation::Animator::loop, this)
+      animationTask(&wrapper::animation::Animator::loop, this)
       {
         animationTask.start("AnimationTask", 0, 4096);
       }

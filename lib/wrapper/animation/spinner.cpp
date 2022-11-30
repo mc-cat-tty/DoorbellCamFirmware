@@ -2,7 +2,7 @@
 #include <common.hpp>
 #include <log/log.hpp>
 
-using namespace app::animation;
+using namespace wrapper::animation;
 
 constexpr static const auto mod = wrapper::log::Module::ANIMATION;
 

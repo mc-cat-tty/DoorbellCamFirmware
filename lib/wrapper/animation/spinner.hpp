@@ -5,7 +5,7 @@
 
 using namespace hal::mux;
 
-namespace app::animation {
+namespace wrapper::animation {
   enum class SpinnerStdDelay : time_t {
     DELAY_MS_5 = 5_ms,
     DELAY_MS_10 = 10_ms,
