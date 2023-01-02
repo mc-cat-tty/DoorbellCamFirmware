@@ -24,46 +24,25 @@ using namespace wrapper::animation;
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
-uint32_t PWM_VALUE;
-time_t RISING_TIME_1 = 0ULL;
-time_t FALLING_TIME_2 = 0ULL;
-time_t RISING_TIME_3 = 0ULL;
-auto QUEUE = xQueueCreate(1000, sizeof(float));
-TaskHandle_t PWM_HANDLE;
+auto QUEUE = xQueueCreate(10, sizeof(float));
+TaskHandle_t RX_HANDLE;
 static const auto RX_EDGE_BIT = 0X01;
-portMUX_TYPE MUX = portMUX_INITIALIZER_UNLOCKED;
-uint32_t DEBOUNCE_VECTOR = 0;
-typedef enum {
-  RISING1,
-  FALLING2,
-  RISING3,
-  FALLING4,
-} StateFsm;
-StateFsm fsmState = RISING1;
 
 static void IRAM_ATTR pwmCountIsr(void *args) {
-  // PWM_VALUE = mcpwm_capture_signal_get_value(MCPWM_UNIT_0, MCPWM_SELECT_CAP0);
-
   BaseType_t higherPriorityTaskWoken = pdFALSE;
 
-  portENTER_CRITICAL_ISR(&MUX);
-
-  // xTaskNotifyFromISR(
-  //   PWM_HANDLE,
-  //   RX_EDGE_BIT,
-  //   eSetBits,
-  //   &higherPriorityTaskWoken
-  // );
-
-  ets_printf("Edge %d: %d\n", gpio_get_level(GPIO_NUM_23), xTaskGetTickCountFromISR());
-
-  portEXIT_CRITICAL_ISR(&MUX);
+  xTaskNotifyFromISR(
+    RX_HANDLE,
+    RX_EDGE_BIT,
+    eSetBits,
+    &higherPriorityTaskWoken
+  );
   
-  // portYIELD_FROM_ISR(higherPriorityTaskWoken);
+  portYIELD_FROM_ISR(higherPriorityTaskWoken);
 }
 
 
-void pwmCounterHandler(void *args) {
+void txTask(void *args) {
   auto tx = TxPwm(GPIO_NUM_18);
   tx.getTxTask().start("TxTask", 0, 8192);
 
@@ -78,6 +57,76 @@ void pwmCounterHandler(void *args) {
     vTaskDelay(pdMS_TO_TICKS(4_s));
     tx.sendDutyAsync(0.5f);
     vTaskDelay(pdMS_TO_TICKS(4_s));
+  }
+}
+
+void rxTask(void *args) {
+  static uint64_t upCount = 0;
+  static uint64_t downCount = 0;
+
+  typedef enum class State {
+    WAITING,
+    RECEIVING,
+  } State;
+
+  static auto state = State::WAITING;
+
+  auto level = gpio_get_level(GPIO_NUM_23);
+  static int64_t rxStartTime = esp_timer_get_time();
+  bool isTimeout;
+  uint32_t notifiedVal;
+  bool canStartRx;
+
+  for (EVER) {
+    switch (state) {
+      case State::WAITING:
+      upCount = 0;
+      downCount = 0;
+      
+      // canStartRx =
+      //   xTaskNotifyWait(pdFALSE, ULONG_MAX, &notifiedVal, portMAX_DELAY)
+      //   ==
+      //   pdTRUE;
+      
+      if (level) {
+        state = State::RECEIVING;
+        upCount++;
+        rxStartTime = esp_timer_get_time();
+      }
+
+      break;
+
+      case State::RECEIVING:
+      if (level) {
+        upCount++;
+      }
+      else {
+        downCount++;
+      }
+
+      isTimeout = esp_timer_get_time() - rxStartTime >= 2100e3;
+      if (isTimeout) {
+        state = State::WAITING;
+      }
+
+      break;
+
+      default:
+      state = State::WAITING;
+      break;
+    }
+
+    if (state == State::WAITING && upCount && downCount) {
+      float duty = (float) upCount / (float) (upCount + downCount);
+      // duty = roundf(duty * 10);
+      xQueueSend(
+        QUEUE,
+        &duty,
+        0
+      );
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(10_ms));
   }
 }
 
@@ -110,15 +159,15 @@ void app_main() {
   // builtin_led.getBlinkTask().start("BuiltinLedTask", 0, 4096);
 
   xTaskCreatePinnedToCore(
-    pwmCounterHandler,
-    "pwmCounterHandler",
+    txTask,
+    "txTask",
     10240,
     nullptr,
     0,
-    &PWM_HANDLE,
+    nullptr,
     1
   );
- 
+
   const auto rxPinConfig = (gpio_config_t) {
     .pin_bit_mask = 1ULL << GPIO_NUM_23,
     .mode = GPIO_MODE_INPUT,
@@ -130,6 +179,16 @@ void app_main() {
   auto rxPin = Pin(
     GPIO_NUM_23,
     rxPinConfig
+  );
+
+  xTaskCreatePinnedToCore(
+    rxTask,
+    "rxTask",
+    1024,
+    nullptr,
+    configMAX_PRIORITIES - 1,
+    &RX_HANDLE,
+    0
   );
 
   // gpio_install_isr_service(0);
@@ -163,93 +222,22 @@ void app_main() {
   // auto animator = Animator(spinnerFw, 200_ms);
   // logger.log(mod, ESP_LOG_DEBUG, "First animation run");
 
-  uint64_t upCount = 0;
-  uint64_t downCount = 0;
-
-  typedef enum class State {
-    ENTRY,
-    WAITING,
-    RECEIVING,
-  } State;
-
-  auto state = State::ENTRY;
-
-
+  float duty;
   for (EVER) {
-    // RX ISR
-    // if (
-    //   QUEUE != nullptr &&
-    //   xQueueReceive(
-    //     QUEUE,
-    //     &upPercentage,
-    //     pdMS_TO_TICKS(100_ms)
-    //   )
-    // ) {
-    //   logger.log(mod, ESP_LOG_INFO, "Duty: %f\n", upPercentage);
-    // }
+    if (
+      QUEUE != nullptr &&
+      xQueueReceive(
+        QUEUE,
+        &duty,
+        portMAX_DELAY
+      )
+    ) {
+      logger.log(mod, ESP_LOG_INFO, "Duty: %f\n", duty);
+    }
 
     // if (!animator.isRunning()) {
     //   spinnerFw = SpinnerForwardAnimation(ledRingDemux);
     //   animator = Animator(spinnerFw, 200_ms);
     // }
-
-
-    auto level = gpio_get_level(GPIO_NUM_23);
-    int64_t rxStartTime;
-    bool isTimeout;
-
-    switch (state) {
-      case State::ENTRY:
-      upCount = 0;
-      downCount = 0;
-
-      if (level) {
-        state = State::RECEIVING;
-        rxStartTime = esp_timer_get_time();
-      }
-      else {
-        state = State::WAITING;
-      }
-
-      break;
-
-      case State::WAITING:
-      upCount = 0;
-      downCount = 0;
-      
-      if (level) {
-        state = State::RECEIVING;
-        upCount++;
-        rxStartTime = esp_timer_get_time();
-      }
-
-      break;
-
-      case State::RECEIVING:
-      if (level) {
-        upCount++;
-      }
-      else {
-        downCount++;
-      }
-
-      isTimeout = esp_timer_get_time() - rxStartTime >= 2100e3;
-      if (isTimeout) {
-        state = State::WAITING;
-      }
-
-      break;
-
-      default:
-      state = State::ENTRY;
-      break;
-    }
-
-    if (state == State::WAITING && upCount && downCount) {
-      float duty = (float) upCount / (float) (upCount + downCount);
-      logger.log(mod, ESP_LOG_INFO, "Duty: %f\n", roundf(duty*10));
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(10_ms));
   }
 }
