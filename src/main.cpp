@@ -10,6 +10,7 @@
 #include <math.h>
 #include <driver/gpio.h>
 #include <driver/mcpwm.h>
+#include <driver/rmt.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -67,8 +68,16 @@ void pwmCounterHandler(void *args) {
   tx.getTxTask().start("TxTask", 0, 8192);
 
   for (EVER) {
+    tx.sendDutyAsync(0.1f);
+    vTaskDelay(pdMS_TO_TICKS(4_s));
+    tx.sendDutyAsync(0.2f);
+    vTaskDelay(pdMS_TO_TICKS(4_s));
     tx.sendDutyAsync(0.3f);
-    vTaskDelay(pdMS_TO_TICKS(2_s));
+    vTaskDelay(pdMS_TO_TICKS(4_s));
+    tx.sendDutyAsync(0.4f);
+    vTaskDelay(pdMS_TO_TICKS(4_s));
+    tx.sendDutyAsync(0.5f);
+    vTaskDelay(pdMS_TO_TICKS(4_s));
   }
 }
 
@@ -154,7 +163,6 @@ void app_main() {
   // auto animator = Animator(spinnerFw, 200_ms);
   // logger.log(mod, ESP_LOG_DEBUG, "First animation run");
 
-
   uint64_t upCount = 0;
   uint64_t downCount = 0;
 
@@ -166,10 +174,9 @@ void app_main() {
 
   auto state = State::ENTRY;
 
-  for (EVER) {
-    // current_duty += duty_increment;
-    // current_duty %= max_duty;
 
+  for (EVER) {
+    // RX ISR
     // if (
     //   QUEUE != nullptr &&
     //   xQueueReceive(
@@ -185,6 +192,7 @@ void app_main() {
     //   spinnerFw = SpinnerForwardAnimation(ledRingDemux);
     //   animator = Animator(spinnerFw, 200_ms);
     // }
+
 
     auto level = gpio_get_level(GPIO_NUM_23);
     int64_t rxStartTime;
@@ -225,8 +233,8 @@ void app_main() {
         downCount++;
       }
 
-      isTimeout = esp_timer_get_time() - rxStartTime >= 2005e3;  // 500 ms
-      if (isTimeout && !level) {
+      isTimeout = esp_timer_get_time() - rxStartTime >= 2100e3;
+      if (isTimeout) {
         state = State::WAITING;
       }
 
@@ -239,7 +247,7 @@ void app_main() {
 
     if (state == State::WAITING && upCount && downCount) {
       float duty = (float) upCount / (float) (upCount + downCount);
-      logger.log(mod, ESP_LOG_INFO, "Duty: %f\n", duty);
+      logger.log(mod, ESP_LOG_INFO, "Duty: %f\n", roundf(duty*10));
     }
 
     vTaskDelay(pdMS_TO_TICKS(10_ms));
