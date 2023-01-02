@@ -20,7 +20,7 @@ TxPwm::TxPwm(gpio_num_t pin_num) : tx_task(&hal::rf::TxPwm::txTask, this) {
     .speed_mode = LEDC_HIGH_SPEED_MODE,
     .duty_resolution = duty_resolution,
     .timer_num = LEDC_TIMER_0,
-    .freq_hz = 1_kHz,
+    .freq_hz = 5_Hz,
     .clk_cfg = LEDC_AUTO_CLK,
   };
   timer_conf = timer_conf_local;
@@ -60,14 +60,14 @@ void TxPwm::setDutyPercentage(float duty_cycle_percentage) {
   static float rcv_duty;
 
   for (EVER) {
-    bool duty_received =
+    const bool duty_received =
       duty_queue != NULL &&
       xQueueReceive(duty_queue, &rcv_duty, 5);
     
     if (duty_received) {
       logger.log(mod, ESP_LOG_DEBUG, "Sending duty=%f", rcv_duty);
-      ledc_timer_resume(channel_conf.speed_mode, channel_conf.timer_sel);
       setDutyPercentage(rcv_duty);
+      ledc_timer_resume(channel_conf.speed_mode, channel_conf.timer_sel);
       vTaskDelay(pdMS_TO_TICKS(tx_time));
       ledc_stop(channel_conf.speed_mode, channel_conf.channel, 0);
       ledc_timer_pause(channel_conf.speed_mode, channel_conf.timer_sel);
