@@ -20,7 +20,7 @@ TxPwm::TxPwm(gpio_num_t pin_num) : tx_task(&hal::rf::TxPwm::txTask, this) {
     .speed_mode = LEDC_HIGH_SPEED_MODE,
     .duty_resolution = duty_resolution,
     .timer_num = LEDC_TIMER_0,
-    .freq_hz = 5_Hz,
+    .freq_hz = tx_freq,
     .clk_cfg = LEDC_AUTO_CLK,
   };
   timer_conf = timer_conf_local;
@@ -51,7 +51,7 @@ void TxPwm::setDutyAbs(unsigned long new_duty) const {
 void TxPwm::setDutyPercentage(float duty_cycle_percentage) {
   duty_cycle_percentage = duty_cycle_percentage > 1.f ? 1.f : duty_cycle_percentage;
   duty_cycle_percentage = duty_cycle_percentage < 0.f ? 0.f : duty_cycle_percentage;
-  static const unsigned long max_duty = pow(2, static_cast<int>(duty_resolution)) - 1;
+  static const unsigned long max_duty = powl(2, duty_resolution) - 1;
   setDutyAbs(duty_cycle_percentage * max_duty);
 }
 

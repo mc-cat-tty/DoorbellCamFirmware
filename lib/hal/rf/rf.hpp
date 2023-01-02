@@ -12,8 +12,9 @@ namespace hal::rf {
    */
   class TxPwm {
     private:
-    constexpr static const unsigned queue_dim = 3;
+    constexpr static const unsigned queue_dim = 1;
     constexpr static const unsigned tx_time = 2_s;
+    constexpr static const unsigned tx_freq = 5_Hz;
     ledc_timer_bit_t duty_resolution;
     ledc_timer_config_t timer_conf;
     ledc_channel_config_t channel_conf;
