@@ -1,3 +1,5 @@
+#ifdef RECEIVER
+
 #include "main.hpp"
 #include <log/log.hpp>
 #include <common.hpp>
@@ -24,21 +26,6 @@ using namespace wrapper::animation;
 
 constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
-void txTask(void *args) {
-  auto tx = TxPwm(GPIO_NUM_18);
-  tx.getTxTask().start("TxTask", 0, 8192);
-
-  auto sequenceTx = TxSequence(
-    tx,
-    {1, 3, 5},
-    2_s
-  );
-
-  for (EVER) {
-    sequenceTx.sendSequence();
-  }
-}
-
 void app_main() {
   static wrapper::log::Logger logger = wrapper::log::Logger::getInstance()
     .setThresholdLevel(ESP_LOG_DEBUG)
@@ -50,16 +37,6 @@ void app_main() {
       wrapper::log::Module::TASK,
       wrapper::log::Module::ANIMATION,
     });
-
-  xTaskCreatePinnedToCore(
-    txTask,
-    "txTask",
-    10240,
-    nullptr,
-    0,
-    nullptr,
-    1
-  );
 
   auto rx = RxPwm(GPIO_NUM_23);
   rx.getRxTask().start(
@@ -108,3 +85,5 @@ void app_main() {
     vTaskDelay(pdMS_TO_TICKS(1_s));
   }
 }
+
+#endif  // RECEIVER
