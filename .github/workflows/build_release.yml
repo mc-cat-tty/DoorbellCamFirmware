@@ -4,8 +4,8 @@ on:
     tags:
       - 'v*'
 jobs:
-  permissions: read-all
   build:
+    permissions: read-all
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
