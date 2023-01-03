@@ -40,7 +40,7 @@ jobs:
     - name: Merge Transmitter Firmware
       run: |
         cd .pio/build/transmitter/
-        esptool.py --chip esp32 merge_bin -o transmitter_fw.bin 0x1000 bootloader.bin 0x8000 partition.bin 0x10000 firmware.bin
+        esptool.py --chip esp32 merge_bin -o transmitter_fw.bin 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
         cd -
         mv .pio/build/transmitter/transmitter_fw.bin .
     - name: Set Environment
