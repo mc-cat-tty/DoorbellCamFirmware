@@ -73,6 +73,6 @@ void TxPwm::setDutyPercentage(float duty_cycle_percentage) {
       ledc_timer_pause(channel_conf.speed_mode, channel_conf.timer_sel);
     }
 
-    vTaskDelay(pdMS_TO_TICKS(100_ms));
+    vTaskDelay(pdMS_TO_TICKS(500_ms));
   }
 }
