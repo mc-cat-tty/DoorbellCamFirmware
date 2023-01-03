@@ -7,7 +7,7 @@ You can find other parts of the project at:
 
 
 ## 4Users
- 1. Download _receiver\_fw.bin_ and _transmitter\_fw.bin_ from [https://github.com/mc-cat-tty/DoorbellCamFirmware/releases/tag/v0.9](https://github.com/mc-cat-tty/DoorbellCamFirmware/releases/tag/v0.9)
+ 1. Download _receiver\_fw.bin_ and _transmitter\_fw.bin_ from [https://github.com/mc-cat-tty/DoorbellCamFirmware/releases/latest](https://github.com/mc-cat-tty/DoorbellCamFirmware/releases/latest)
 
  2. Flash them on your ESP32s
 ```bash
