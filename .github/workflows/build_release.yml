@@ -5,7 +5,8 @@ on:
       - 'v*'
 jobs:
   build:
-    permissions: write-all
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
@@ -49,13 +50,9 @@ jobs:
         git fetch --depth=1 origin +refs/tags/*:refs/tags/*
         echo "TAG_MESSAGE=$(git tag -l --format='%(contents:subject)' ${GITHUB_REF#refs/*/})" >> $GITHUB_ENV      
     - name: Create Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REF: ${{ github.ref }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${GITHUB_REF##*/}
-        release_name: Release ${GITHUB_REF##*/}
+        artifacts: "transmitter_fw.bin,receiver_fw.bin"
         body: $TAG_MESSAGE
         draft: false
         prerelease: false
