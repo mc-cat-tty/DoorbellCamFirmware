@@ -1,0 +1,59 @@
+name: Build and Release Firmware - PIO CI
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+    - name: Install ESP Tool
+      run: python -m pip install esptool
+    - name: Run PlatformIO Build
+      run: pio run -e transmitter -e receiver
+    - name: Merge Receiver Firmware
+      run: |
+        cd .pio/build/receiver/
+        esptool.py --chip esp32 merge_bin -o receiver_fw.bin 0x1000 bootloader.bin 0x8000 partition.bin 0x10000 firmware.bin
+        cd -
+        mv .pio/build/receiver/receiver_fw.bin .
+    - name: Merge Transmitter Firmware
+      run: |
+        cd .pio/build/transmitter/
+        esptool.py --chip esp32 merge_bin -o transmitter_fw.bin 0x1000 bootloader.bin 0x8000 partition.bin 0x10000 firmware.bin
+        cd -
+        mv .pio/build/transmitter/transmitter_fw.bin .
+    - name: Create Release
+      uses: actions/create-release@v1
+      run: |
+        git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+        echo "TAG_MESSAGE=$(git tag -l --format='%(contents:subject)'${GITHUB_REF#refs/*/})" >> $GITHUB_ENV
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REF: ${{ github.ref }}
+      with:
+        tag_name: ${GITHUB_REF##*/}
+        release_name: Release ${GITHUB_REF##*/}
+        body: $TAG_MESSAGE
+        draft: false
+        prerelease: false
