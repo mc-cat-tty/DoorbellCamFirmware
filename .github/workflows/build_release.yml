@@ -1,8 +1,8 @@
 name: Build and Release Firmware - PIO CI
 on:
   push:
-    branches:
-      - 'master'
+    tags:
+      - 'v*'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,11 +43,12 @@ jobs:
         esptool.py --chip esp32 merge_bin -o transmitter_fw.bin 0x1000 bootloader.bin 0x8000 partition.bin 0x10000 firmware.bin
         cd -
         mv .pio/build/transmitter/transmitter_fw.bin .
-    - name: Create Release
-      uses: actions/create-release@v1
+    - name: Set Environment
       run: |
         git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-        echo "TAG_MESSAGE=$(git tag -l --format='%(contents:subject)'${GITHUB_REF#refs/*/})" >> $GITHUB_ENV
+        echo "TAG_MESSAGE=$(git tag -l --format='%(contents:subject)'${GITHUB_REF#refs/*/})" >> $GITHUB_ENV      
+    - name: Create Release
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_REF: ${{ github.ref }}
