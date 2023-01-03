@@ -1,7 +1,7 @@
 name: Build and Release Firmware - PIO CI
 on:
   push:
-    branch:
+    branches:
       - 'master'
 jobs:
   build:
