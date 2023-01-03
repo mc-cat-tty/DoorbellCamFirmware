@@ -53,6 +53,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "transmitter_fw.bin,receiver_fw.bin"
-        body: $TAG_MESSAGE
+        body: ${TAG_MESSAGE}
         draft: false
         prerelease: false
