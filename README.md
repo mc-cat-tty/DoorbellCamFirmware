@@ -14,25 +14,25 @@ You can find other parts of the project at:
 You may need to add `export PATH="$HOME/.platformio/penv/bin/:$PATH"` to your `~/.bashrc` or `~/.zshrc` shell configuration file.
 
 ## How to build
-Development:
+Transmitter:
 ```bash
-pio run --environment esp32doit-devkit-v1
+pio run --environment transmitter
 ```
 
-Release:
+Receiver:
 ```bash
-pio run --environment release
+pio run --environment receiver
 ```
 
 ## How to flash
-Move into *DoorbellCamFirmware/.pio/build/[esp32doit-devkit-v1|release]*
+Move into *DoorbellCamFirmware/.pio/build/[transmitter|receiver]*
 
 ```bash
 esptool.py -p /dev/ttyUSB0 -b 115200 write_flash -fm dio -z 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
 ```
 
 ## How to debug
-Move into *DoorbellCamFirmware/.pio/build/[esp32doit-devkit-v1|release]*
+Move into *DoorbellCamFirmware/.pio/build/[transmitter|receiver]*
 
 Dump all symbols:
 ```bash
