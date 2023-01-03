@@ -1,4 +1,6 @@
 #pragma once
+#include <initializer_list>
+#include <math.h>
 #include <driver/gpio.h>
 #include <driver/ledc.h>
 #include <task/task.hpp>
@@ -14,7 +16,7 @@ namespace hal::rf {
    */
   class TxPwm {
     private:
-    constexpr static const unsigned queue_dim = 3;
+    constexpr static const unsigned queue_dim = 10;
     constexpr static const unsigned tx_time = 2_s;
     constexpr static const unsigned tx_freq = 5_Hz;
     ledc_timer_bit_t duty_resolution;
@@ -68,6 +70,60 @@ namespace hal::rf {
 
     [[nodiscard]] inline constexpr Task<hal::rf::RxPwm> getRxTask() const {
       return rxTaskHandle;
+    }
+  };
+
+  class TxSequence {
+    private:
+    TxPwm transmitter;
+    std::vector<uint8_t> sequence;
+    time_t txDelayMs;
+
+    public:
+    TxSequence(
+      TxPwm transmitter,
+      std::initializer_list<uint8_t> sequence,
+      time_t txDelayMs) :
+      transmitter(transmitter),
+      sequence(sequence),
+      txDelayMs(txDelayMs) { };
+    
+    inline void sendSequence() {
+      for (const auto &num : sequence) {
+        transmitter.sendDutyAsync(num / 10.f);
+        vTaskDelay(pdMS_TO_TICKS(txDelayMs));
+      }
+    }
+  };
+
+  class RxSequence {
+    private:
+    RxPwm receiver;
+    std::vector<uint8_t> sequence;
+    uint8_t currentMatch = 0;
+    float currentDuty;
+
+    public:
+    RxSequence(
+      RxPwm receiver,
+      std::initializer_list<uint8_t> sequence) :
+    receiver(receiver),
+    sequence(sequence) { };
+
+    [[nodiscard]] inline bool rcvdSequenceAsync() {
+      if (receiver.getDutyAsync(currentDuty)) {
+        if (sequence[currentMatch] != lroundf(currentDuty * 10.f)) {
+          currentMatch = 0;
+          return false;
+        }
+
+        currentMatch++;
+        currentMatch %= sequence.size();
+
+        return currentMatch == 0;  // Return if matched an entire sequence
+      }
+
+      return false;
     }
   };
 }

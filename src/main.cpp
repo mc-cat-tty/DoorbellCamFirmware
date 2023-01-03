@@ -28,17 +28,14 @@ void txTask(void *args) {
   auto tx = TxPwm(GPIO_NUM_18);
   tx.getTxTask().start("TxTask", 0, 8192);
 
+  auto sequenceTx = TxSequence(
+    tx,
+    {1, 3, 5},
+    2_s
+  );
+
   for (EVER) {
-    tx.sendDutyAsync(0.1f);
-    vTaskDelay(pdMS_TO_TICKS(4_s));
-    tx.sendDutyAsync(0.2f);
-    vTaskDelay(pdMS_TO_TICKS(4_s));
-    tx.sendDutyAsync(0.3f);
-    vTaskDelay(pdMS_TO_TICKS(4_s));
-    tx.sendDutyAsync(0.4f);
-    vTaskDelay(pdMS_TO_TICKS(4_s));
-    tx.sendDutyAsync(0.5f);
-    vTaskDelay(pdMS_TO_TICKS(4_s));
+    sequenceTx.sendSequence();
   }
 }
 
@@ -71,39 +68,43 @@ void app_main() {
     4096
   );
 
-  // const auto ledsConfig = (gpio_config_t) {
-  //   .pin_bit_mask =
-  //     1ULL << 25 |
-  //     1ULL << 26 |
-  //     1ULL << 32 |
-  //     1ULL << 33,
-  //   .mode = GPIO_MODE_OUTPUT,
-  //   .pull_up_en = GPIO_PULLUP_DISABLE,
-  //   .pull_down_en = GPIO_PULLDOWN_DISABLE,
-  //   .intr_type = GPIO_INTR_DISABLE,
-  // };
+  auto rxSequence = RxSequence(
+    rx,
+    {1, 3, 5}
+  );
 
-  // auto ledRingDemux = Demux{
-  //   Led(GPIO_NUM_33, ledsConfig),
-  //   Led(GPIO_NUM_25, ledsConfig),
-  //   Led(GPIO_NUM_32, ledsConfig),
-  //   Led(GPIO_NUM_26, ledsConfig),
-  // };
+  const auto ledsConfig = (gpio_config_t) {
+    .pin_bit_mask =
+      1ULL << 25 |
+      1ULL << 26 |
+      1ULL << 32 |
+      1ULL << 33,
+    .mode = GPIO_MODE_OUTPUT,
+    .pull_up_en = GPIO_PULLUP_DISABLE,
+    .pull_down_en = GPIO_PULLDOWN_DISABLE,
+    .intr_type = GPIO_INTR_DISABLE,
+  };
 
-  // auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-  // auto animator = Animator(spinnerFw, 200_ms);
-  // logger.log(mod, ESP_LOG_DEBUG, "First animation run");
+  auto ledRingDemux = Demux{
+    Led(GPIO_NUM_33, ledsConfig),
+    Led(GPIO_NUM_25, ledsConfig),
+    Led(GPIO_NUM_32, ledsConfig),
+    Led(GPIO_NUM_26, ledsConfig),
+  };
 
-  float lastDuty;
+  auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
+  auto animator = Animator(spinnerFw, 200_ms);
+  logger.log(mod, ESP_LOG_DEBUG, "First animation run");
+
   for (EVER) {
-    if (rx.getDutyAsync(lastDuty)) {
-      logger.log(mod, ESP_LOG_INFO, "Received: %f", lastDuty);
+    if (rxSequence.rcvdSequenceAsync()) {
+      logger.log(mod, ESP_LOG_INFO, "Sequence matched");
+      if (!animator.isRunning()) {
+        spinnerFw = SpinnerForwardAnimation(ledRingDemux);
+        animator = Animator(spinnerFw, 200_ms);
+      }
     }
-    vTaskDelay(pdMS_TO_TICKS(1_s));
 
-    // if (!animator.isRunning()) {
-    //   spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-    //   animator = Animator(spinnerFw, 200_ms);
-    // }
+    vTaskDelay(pdMS_TO_TICKS(1_s));
   }
 }
