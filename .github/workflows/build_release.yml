@@ -5,7 +5,7 @@ on:
       - 'v*'
 jobs:
   build:
-    permissions: read-all | write-all
+    permissions: read-all|write-all
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
