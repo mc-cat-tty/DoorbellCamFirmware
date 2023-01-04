@@ -76,10 +76,8 @@ void app_main() {
   for (EVER) {
     if (rxSequence.rcvdSequenceAsync()) {
       logger.log(mod, ESP_LOG_INFO, "Sequence matched");
-      if (!animator.isRunning()) {
-        spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-        animator = Animator(spinnerFw, 200_ms);
-      }
+      spinnerFw = SpinnerForwardAnimation(ledRingDemux);
+      animator = Animator(spinnerFw, 200_ms);
     }
 
     vTaskDelay(pdMS_TO_TICKS(1_s));
