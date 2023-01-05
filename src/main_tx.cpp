@@ -40,13 +40,11 @@ void app_main() {
 
   auto sequenceTx = TxSequence(
     tx,
-    {1, 3, 5},
-    2_s
+    {1, 3, 5, 9},
+    1_s
   );
   
-  for (EVER) {
-    sequenceTx.sendSequence();
-  }
+  sequenceTx.sendSequence();
 }
 
 #endif  // TRANSMITTER
