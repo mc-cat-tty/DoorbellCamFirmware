@@ -102,17 +102,25 @@ namespace hal::rf {
     std::vector<uint8_t> sequence;
     uint8_t currentMatch = 0;
     float currentDuty;
+    uint8_t tolerance;
 
     public:
     RxSequence(
       RxPwm receiver,
-      std::initializer_list<uint8_t> sequence) :
+      std::initializer_list<uint8_t> sequence,
+      uint8_t tolerance) :
     receiver(receiver),
-    sequence(sequence) { };
+    sequence(sequence),
+    tolerance(tolerance) { };
 
     [[nodiscard]] inline bool rcvdSequenceAsync() {
+      long currentDutyInt = lroundf(currentDuty * 10.f);
+
       if (receiver.getDutyAsync(currentDuty)) {
-        if (sequence[currentMatch] != lroundf(currentDuty * 10.f)) {
+        if (
+          currentDutyInt < sequence[currentMatch] - tolerance ||
+          currentDutyInt > sequence[currentMatch] + tolerance
+        ) {
           currentMatch = 0;
           return false;
         }

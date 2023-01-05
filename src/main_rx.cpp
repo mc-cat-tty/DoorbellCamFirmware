@@ -47,7 +47,8 @@ void app_main() {
 
   auto rxSequence = RxSequence(
     rx,
-    {1, 3, 5}
+    {1, 3, 5},
+    1
   );
 
   const auto ledsConfig = (gpio_config_t) {
@@ -69,15 +70,16 @@ void app_main() {
     Led(GPIO_NUM_26, ledsConfig),
   };
 
-  auto spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-  auto animator = Animator(spinnerFw, 200_ms);
   logger.log(mod, ESP_LOG_DEBUG, "First animation run");
 
   for (EVER) {
     if (rxSequence.rcvdSequenceAsync()) {
       logger.log(mod, ESP_LOG_INFO, "Sequence matched");
-      spinnerFw = SpinnerForwardAnimation(ledRingDemux);
-      animator = Animator(spinnerFw, 200_ms);
+      auto spinnerFw = new SpinnerForwardAnimation(ledRingDemux);
+      new Animator(
+        *spinnerFw,
+        200_ms
+      );
     }
 
     vTaskDelay(pdMS_TO_TICKS(1_s));
