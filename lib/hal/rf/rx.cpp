@@ -13,7 +13,7 @@ constexpr static const auto mod = Module::RF;
 
 RxPwm::RxPwm(gpio_num_t pinNum)
   : pinNum(pinNum),
-  rxQueue(xQueueCreate(queueDim, sizeof(float))),
+  rxQueue(xQueueCreate(queueDim, sizeof(PwmData))),
   rxTaskHandle(&RxPwm::rxTask, this)
   {
   const auto pinConfig = (gpio_config_t) {
@@ -88,7 +88,13 @@ RxPwm::RxPwm(gpio_num_t pinNum)
       state == State::WAITING &&
       upCount && downCount
     ) {
-      float duty = (float) upCount / (float) (upCount + downCount);
+      const float duty = (float) upCount / (float) (upCount + downCount);
+
+      const auto data = (PwmData) {
+        .duty = duty,
+        .upCount = upCount,
+        .downCount = downCount
+      };
 
       logger.log(mod, ESP_LOG_INFO, "Rx duty: %f\n", duty);
       logger.log(mod, ESP_LOG_DEBUG, "Up count: %d\n", upCount);
@@ -97,7 +103,7 @@ RxPwm::RxPwm(gpio_num_t pinNum)
       if (rxQueue != nullptr) {
         xQueueSend(
           rxQueue,
-          &duty,
+          &data,
           0
         );
       }

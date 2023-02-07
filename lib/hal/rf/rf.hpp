@@ -8,8 +8,16 @@
 #include <freertos/queue.h>
 
 using namespace wrapper::task;
+using namespace wrapper::log;
+
 
 namespace hal::rf {
+  typedef struct PwmData {
+    float duty;
+    uint64_t upCount;
+    uint64_t downCount; 
+  } PwmData;
+ 
   /**
    * @brief encoding state in duty cycle. See LEDC module.
    * 
@@ -57,13 +65,13 @@ namespace hal::rf {
     public:
     RxPwm(gpio_num_t pinNum);
 
-    [[nodiscard]] inline constexpr bool getDutyAsync(float &duty)
+    [[nodiscard]] inline constexpr bool getPwmDataAsync(PwmData &data)
       const {
         return
           rxQueue != nullptr &&
           xQueueReceive(
             rxQueue,
-            &duty,
+            &data,
             0
           );
       }
@@ -101,25 +109,28 @@ namespace hal::rf {
     RxPwm receiver;
     std::vector<uint8_t> sequence;
     uint8_t currentMatch = 0;
-    float currentDuty;
+    PwmData currentData;
     uint8_t tolerance;
+    uint64_t upCountThreshold;
 
     public:
     RxSequence(
       RxPwm receiver,
       std::initializer_list<uint8_t> sequence,
-      uint8_t tolerance) :
+      uint8_t tolerance,
+      uint64_t upCountThreshold) :
     receiver(receiver),
     sequence(sequence),
-    tolerance(tolerance) { };
+    tolerance(tolerance),
+    upCountThreshold(upCountThreshold) { };
 
     [[nodiscard]] inline bool rcvdSequenceAsync() {
-      long currentDutyInt = lroundf(currentDuty * 10.f);
+      long prevDutyInt = lroundf(currentData.duty * 10.f);
 
-      if (receiver.getDutyAsync(currentDuty)) {
+      if (receiver.getPwmDataAsync(currentData) && currentData.upCount > upCountThreshold) {
         if (
-          currentDutyInt < sequence[currentMatch] - tolerance ||
-          currentDutyInt > sequence[currentMatch] + tolerance
+          prevDutyInt < sequence[currentMatch] - tolerance ||
+          prevDutyInt > sequence[currentMatch] + tolerance
         ) {
           currentMatch = 0;
           return false;
@@ -134,4 +145,53 @@ namespace hal::rf {
       return false;
     }
   };
+
+  class RxDeltas {
+    private:
+    RxPwm receiver;
+    std::vector<float> dutyDeltaSequence;
+    uint8_t currentMatch = 0;
+    PwmData currentData;
+    float tolerance;
+    uint64_t upCountThreshold;
+
+    public:
+    RxDeltas(
+      RxPwm receiver,
+      std::initializer_list<float> dutyDeltaSequence,
+      float tolerance,
+      uint64_t upCountThreshold) :
+    receiver(receiver),
+    dutyDeltaSequence(dutyDeltaSequence),
+    tolerance(tolerance),
+    upCountThreshold(upCountThreshold) { };
+
+    [[nodiscard]] inline bool rcvdDeltasAsync() {
+      static const auto logger = Logger::getInstance();
+      static const auto mod = Module::RF;
+
+      float prevDuty = currentData.duty;
+
+      if (receiver.getPwmDataAsync(currentData) && currentData.upCount > upCountThreshold) {
+
+        logger.log(mod, ESP_LOG_DEBUG, "Delta: %f\n", currentData.duty - prevDuty);
+
+        if (
+          currentData.duty - prevDuty < dutyDeltaSequence[currentMatch] - tolerance ||
+          currentData.duty - prevDuty > dutyDeltaSequence[currentMatch] + tolerance
+        ) {
+          currentMatch = 0;
+          return false;
+        }
+
+        currentMatch++;
+        currentMatch %= dutyDeltaSequence.size();
+
+        return currentMatch == 0;  // Return if matched an entire sequence
+      }
+
+      return false;
+    }
+  };
+
 }

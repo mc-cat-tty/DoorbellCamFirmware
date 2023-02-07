@@ -18,13 +18,15 @@
 
 #define EVER ;;
 
+constexpr static const uint8_t INIT_ITERATIONS = 5;
+
+constexpr static const auto mod = wrapper::log::Module::MAIN;
+
 using namespace hal::pin;
 using namespace hal::led;
 using namespace hal::mux;
 using namespace hal::rf;
 using namespace wrapper::animation;
-
-constexpr static const wrapper::log::Module mod = wrapper::log::Module::MAIN;
 
 void app_main() {
   static wrapper::log::Logger logger = wrapper::log::Logger::getInstance()
@@ -45,10 +47,27 @@ void app_main() {
     4096
   );
 
-  auto rxSequence = RxSequence(
+
+  PwmData data;
+  float upCountAvg = 0;
+  for (int i=0; i<INIT_ITERATIONS;) {
+    vTaskDelay(pdMS_TO_TICKS(1_s));
+
+    if (rx.getPwmDataAsync(data)) {
+      upCountAvg += data.upCount;
+      i++;
+    }
+  }
+
+  upCountAvg /= INIT_ITERATIONS;
+
+  logger.log(mod, ESP_LOG_INFO, "upCountAvg: %d", (uint64_t) upCountAvg);
+
+  auto rxSequence = RxDeltas(
     rx,
-    {1, 3, 5},
-    1
+    {+0.5},
+    0.45,
+    upCountAvg + 1
   );
 
   const auto ledsConfig = (gpio_config_t) {
@@ -73,7 +92,7 @@ void app_main() {
   logger.log(mod, ESP_LOG_DEBUG, "First animation run");
 
   for (EVER) {
-    if (rxSequence.rcvdSequenceAsync()) {
+    if (rxSequence.rcvdDeltasAsync()) {
       logger.log(mod, ESP_LOG_INFO, "Sequence matched");
       auto spinnerFw = new SpinnerForwardAnimation(ledRingDemux);
       new Animator(

@@ -40,7 +40,7 @@ void app_main() {
 
   auto sequenceTx = TxSequence(
     tx,
-    {1, 3, 5, 9},
+    {4, 5, 4},
     1_s
   );
   
